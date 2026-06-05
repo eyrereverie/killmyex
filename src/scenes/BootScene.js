@@ -5,6 +5,10 @@ export default class BootScene extends Phaser.Scene {
     super('BootScene');
   }
 
+  preload() {
+    this.load.image('welcomeScreen', 'assets/images/welcome_screen.png');
+  }
+
   create() {
     this.game.canvas.style.imageRendering = 'pixelated';
     this.textures.generate('pixel', {
