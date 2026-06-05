@@ -1,0 +1,30 @@
+{
+  "name": "killmyex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "smoke": "node scripts/smoke-welcome.mjs",
+    "test": "npm run smoke"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eyrereverie/killmyex.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/eyrereverie/killmyex/issues"
+  },
+  "homepage": "https://github.com/eyrereverie/killmyex#readme",
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  }
+}

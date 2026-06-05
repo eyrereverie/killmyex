@@ -1,0 +1,15 @@
+export const Palette = Object.freeze({
+  background: 0x07110a,
+  backgroundHex: '#07110a',
+  sky: 0x101b12,
+  deepGreen: 0x172516,
+  cemeteryGreen: 0x34432f,
+  mutedGreen: 0x56634a,
+  paleBone: 0xe8edc8,
+  paleBoneHex: '#e8edc8',
+  boneShadow: 0x9ba77f,
+  pink: 0xff5f91,
+  pinkDark: 0xb7355b,
+  outline: 0x030603,
+  disabled: 0x5b6654,
+});

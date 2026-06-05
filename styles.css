@@ -1,0 +1,59 @@
+:root {
+  color-scheme: dark;
+  --page-bg: #080d09;
+  --frame-bg: #10180f;
+  --frame-edge: #273622;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(238, 249, 204, 0.08), transparent 24rem),
+    linear-gradient(180deg, #0f150d 0%, var(--page-bg) 72%);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+#game-shell {
+  display: grid;
+  width: min(100vw, calc(100svh * 390 / 844));
+  max-width: 430px;
+  aspect-ratio: 390 / 844;
+  place-items: center;
+  padding: clamp(8px, 2.4vw, 14px);
+  border: 2px solid var(--frame-edge);
+  border-radius: 24px;
+  background: var(--frame-bg);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 6px rgba(236, 247, 195, 0.08);
+}
+
+#game {
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
