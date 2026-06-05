@@ -1,4 +1,5 @@
 import BootScene from '../scenes/BootScene.js';
+import Level1Scene from '../scenes/Level1Scene.js';
 import WelcomeScene from '../scenes/WelcomeScene.js';
 import { Palette } from '../constants/palette.js';
 
@@ -14,11 +15,17 @@ export const gameConfig = {
   pixelArt: true,
   antialias: false,
   roundPixels: true,
+  physics: {
+    default: 'arcade',
+    arcade: {
+      debug: false,
+    },
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
   },
-  scene: [BootScene, WelcomeScene],
+  scene: [BootScene, WelcomeScene, Level1Scene],
 };

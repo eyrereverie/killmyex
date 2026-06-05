@@ -5,5 +5,5 @@ window.addEventListener('load', () => {
     throw new Error('Phaser failed to load.');
   }
 
-  new Phaser.Game(gameConfig);
+  window.killMyExGame = new Phaser.Game(gameConfig);
 });

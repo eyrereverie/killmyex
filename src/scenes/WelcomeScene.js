@@ -14,7 +14,7 @@ export default class WelcomeScene extends Phaser.Scene {
 
     this.addBackgroundImage();
 
-    this.cta = new PixelButton(this, GAME_WIDTH / 2, 720, 230, 54, 'TAP TO START', () => this.startPlaceholder());
+    this.cta = new PixelButton(this, GAME_WIDTH / 2, 720, 230, 54, 'TAP TO START', () => this.startLevelOne());
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER).on('down', () => this.cta.activate());
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', () => this.cta.activate());
@@ -25,7 +25,7 @@ export default class WelcomeScene extends Phaser.Scene {
     });
   }
 
-  startPlaceholder() {
+  startLevelOne() {
     if (this.started) {
       return;
     }
@@ -37,16 +37,8 @@ export default class WelcomeScene extends Phaser.Scene {
       y: 734,
       duration: 180,
       ease: 'Sine.easeOut',
+      onComplete: () => this.scene.start('Level1Scene'),
     });
-
-    this.add.text(GAME_WIDTH / 2, 716, 'NEXT SCREEN\nCOMING LATER', {
-      fontFamily: '"Courier New", monospace',
-      fontSize: '22px',
-      color: '#e8edc8',
-      align: 'center',
-      lineSpacing: 4,
-      resolution: 1,
-    }).setOrigin(0.5);
   }
 
   addBackgroundImage() {
