@@ -1,9 +1,0 @@
-{
-  "name": "Kill My Ex MVP",
-  "short_name": "KillMyEx",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0f140f",
-  "theme_color": "#0f140f",
-  "description": "MVP web prototype for Kill My Ex."
-}
