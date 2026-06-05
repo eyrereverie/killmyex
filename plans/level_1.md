@@ -7,7 +7,7 @@ Implement `Level 1 — Denial` as the first playable Phaser battle level, follow
 - `image_sources/level_1.png`
 - `image_sources/level_1_characters.png`
 
-This phase should create reusable gameplay foundations for later levels: battle scene flow, player controls, automatic shooting, physics/collision, enemy projectiles, health, boss/shield state, special powers, HUD, pause, victory, and game-over handling.
+This phase should create reusable gameplay foundations for later levels: battle scene flow, player controls, manual shooting, physics/collision, enemy projectiles, health, revive/game-over handling, boss/shield state, special powers, HUD, pause, and victory.
 
 ## Current Starting Point
 
@@ -28,17 +28,19 @@ Gameplay systems are not yet implemented, so Level 1 should introduce them in sm
 Keep these controls and game rules:
 
 - Desktop movement: `WASD` and arrow keys.
-- Desktop dash: `Space`.
+- Desktop shoot: `Space`.
+- Desktop dash: `Shift`.
 - Desktop special power: `E`.
 - Desktop pause: `Esc`.
 - Mobile movement: drag-follow movement.
+- Mobile shoot: tap shoot button.
 - Mobile dash: quick swipe.
 - Mobile special power: tap special button.
 - Mobile pause: tap pause button.
-- Shooting is automatic.
+- Shooting is player-triggered vertical fire.
 - Movement is responsive, slightly floaty, readable, and not too fast.
 - Dash is a short burst with brief invincibility.
-- The player focuses on dodging, positioning, and timing rather than manual shooting.
+- The player focuses on dodging, positioning, timing, and simple vertical shooting.
 
 ### Level 1 Design
 
@@ -116,7 +118,7 @@ src/
       Boss.js
       Projectile.js
     systems/
-      AutoShooter.js
+      PlayerShooter.js
       CollisionSystem.js
       HealthSystem.js
       WaveDirector.js
@@ -154,7 +156,7 @@ export const level1Config = {
     dashInvulnerableMs: 300,
   },
   shooting: {
-    fireIntervalMs: 280,
+    fireIntervalMs: 180,
     projectileSpeed: 360,
     damage: 3,
   },
@@ -205,7 +207,7 @@ Start actual battle:
 
 - Player spawns near lower center.
 - Boss remains top center.
-- Auto-shooter begins firing upward.
+- Player fires vertical light shots upward with `Space`.
 - Boss spawns slow emotional bubbles downward.
 - Boss shield absorbs player shots before boss HP can drop.
 - HUD updates in real time.
@@ -253,6 +255,13 @@ When Luz HP reaches `0`:
 - Show `GAME OVER`.
 - Add `Retry` button that restarts `Level1Scene`.
 
+When Luz is hit but still has hearts left:
+
+- Lose one heart.
+- Clear nearby/on-screen emotional bubbles.
+- Respawn Luz near lower center.
+- Give Luz a short revive safety window before damage can happen again.
+
 ## Gameplay Systems
 
 ### Player Controls
@@ -260,6 +269,7 @@ When Luz HP reaches `0`:
 Implement `PlayerInput` as an abstraction over keyboard and touch:
 
 - Expose normalized movement vector.
+- Expose shoot requests.
 - Expose dash requests.
 - Expose special requests.
 - Expose pause requests.
@@ -268,13 +278,15 @@ Keyboard:
 
 - Combine `WASD` and arrow keys.
 - Normalize diagonal movement.
-- `Space` requests dash.
+- `Space` requests a vertical shot.
+- `Shift` requests dash.
 - `E` requests special.
 - `Esc` toggles pause.
 
 Touch:
 
 - Drag-follow movement: Luz follows the active pointer with smoothing.
+- Shoot button taps request a vertical shot.
 - Quick swipe requests dash in swipe direction.
 - Special button taps request special.
 - Pause button taps request pause.
@@ -285,13 +297,13 @@ Movement feel:
 - Apply light smoothing so movement feels floaty but still responsive.
 - Clamp player to battle bounds and keep the bottom HUD safe from overlap.
 
-### Automatic Shooting
+### Player Shooting
 
-Implement `AutoShooter`:
+Implement `PlayerShooter`:
 
-- Fires while combat is active.
+- Fires when the player requests a shot.
 - Shoots vertical light shots upward.
-- Uses a fixed interval.
+- Uses a short cooldown so Space cannot flood the pool.
 - Reuses inactive projectile objects via Phaser groups/pools.
 - Damages boss shield first, then boss HP.
 
@@ -354,7 +366,8 @@ Damage rules:
 
 - Luz starts with `3` hearts.
 - On hit, lose one heart.
-- Apply short invulnerability after damage.
+- If hearts remain, revive near lower center with a short safety window.
+- If no hearts remain, show game over.
 - Ignore damage during dash invulnerability and Zero Contact safety window.
 
 ### Clarity / Special Resource
@@ -402,7 +415,7 @@ Build Level 1 so future levels can reuse:
 
 - `Player`.
 - `PlayerInput`.
-- `AutoShooter`.
+- `PlayerShooter`.
 - `Projectile`.
 - `Boss`.
 - `BattleHud`.
@@ -442,6 +455,7 @@ Level-specific differences should live in config:
 2. Implement keyboard movement.
 3. Implement drag-follow touch movement.
 4. Implement dash with invulnerability.
+5. Implement manual Space shooting input.
 5. Clamp movement to battle bounds.
 
 ### Phase 4 — Shooting and Boss Shield
@@ -501,8 +515,9 @@ Level 1 is complete when:
 - The player can start from the welcome screen and reach Level 1.
 - Level intro and boss dialogue appear before combat.
 - Luz moves with keyboard and touch drag-follow.
-- Luz auto-shoots upward.
+- Luz shoots upward when Space is pressed.
 - Dash works with brief invulnerability.
+- Losing a heart revives Luz while hearts remain; game over only appears when all hearts are gone.
 - test.exe has shield HP and boss HP.
 - Player shots break the shield and then damage boss HP.
 - Slow emotional bubbles spawn and damage Luz on collision.

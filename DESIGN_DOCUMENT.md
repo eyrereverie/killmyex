@@ -129,8 +129,8 @@ Move up	W / Arrow Up
 Move down	S / Arrow Down
 Move left	A / Arrow Left
 Move right	D / Arrow Right
-Shoot	Automatic
-Dash / quick dodge	Space
+Shoot	Space
+Dash / quick dodge	Shift
 Special power	E
 Pause	Esc
 
@@ -138,7 +138,7 @@ Mobile / Touch Controls
 
 Action	Touch Input
 Move Luz	Drag finger on screen
-Shoot	Automatic
+Shoot	Tap shoot button
 Dash / dodge	Quick swipe
 Special power	Tap special button
 Pause	Tap pause button
@@ -157,10 +157,10 @@ Recommended movement style:
 
 Desktop: 8-direction movement
 Mobile: drag-follow movement
-Shooting: automatic vertical shots
+Shooting: player-triggered vertical shots
 Dash: short burst with brief invincibility
 
-The player should focus on dodging, positioning, timing and emotional recognition, not on manual shooting.
+The player should focus on dodging, positioning, timing and emotional recognition, with shooting kept simple and vertical.
 
 ## Levels
 
