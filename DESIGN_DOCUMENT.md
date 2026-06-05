@@ -45,6 +45,8 @@ Out of scope:
 - Other: pixel graphics without antialiasing but with round pixels; game is centered in the middle of the screen
   and can be maximized to full screen - Phaser takes care of proper scaling so all the proportions remain the same
 
+Technical details will be documented in TECHNICAL_DOCUMENT.md
+
 ## 3. Story
 
 The player fights symbolic enemies made from painful memories, toxic messages, jealousy, rage, and heartbreak. Each level represents a stage of emotional recovery, ending with the player defeating the exaggerated “Ex Boss” and reclaiming control, confidence, and freedom.
