@@ -13,6 +13,10 @@ export default class PlayerShooter {
   }
 
   shoot(time) {
+    if (!this.player.canShoot || !this.player.sprite.active || !this.player.sprite.visible) {
+      return false;
+    }
+
     if (time - this.lastShotAt < this.config.fireIntervalMs) {
       return false;
     }

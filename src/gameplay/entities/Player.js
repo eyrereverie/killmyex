@@ -8,6 +8,10 @@ export default class Player {
     this.invulnerableUntil = 0;
     this.dashingUntil = 0;
     this.revivingUntil = 0;
+    this.isAlive = true;
+    this.isRespawning = false;
+    this.canMove = true;
+    this.canShoot = true;
     this.velocity = new Phaser.Math.Vector2();
 
     this.sprite = scene.physics.add.sprite(x, y, 'level1-luz');
@@ -15,12 +19,21 @@ export default class Player {
     this.sprite.body.setAllowGravity(false);
     this.sprite.body.setSize(18, 24, true);
     this.sprite.setCollideWorldBounds(false);
+    this.resetForBattle(x, y);
   }
 
   update(time, input) {
-    if (time < this.revivingUntil) {
+    if (this.isRespawning) {
+      if (time >= this.revivingUntil) {
+        this.completeRevive(time);
+      } else {
+        this.sprite.body.stop();
+      }
+      return;
+    }
+
+    if (!this.isAlive || !this.canMove) {
       this.sprite.body.setVelocity(0, 0);
-      this.sprite.setAlpha(Math.floor(time / 80) % 2 === 0 ? 0.25 : 0.72);
       return;
     }
 
@@ -55,11 +68,12 @@ export default class Player {
   }
 
   damage(time, amount = 1) {
-    if (this.isInvulnerable(time) || time < this.revivingUntil) {
+    if (!this.canTakeDamage(time)) {
       return false;
     }
 
     this.hp = Math.max(0, this.hp - amount);
+    this.isAlive = this.hp > 0;
     this.invulnerableUntil = time + this.config.hitInvulnerableMs;
     this.scene.tweens.add({
       targets: this.sprite,
@@ -72,13 +86,29 @@ export default class Player {
   }
 
   revive(time, x, y) {
+    if (this.hp <= 0) {
+      return;
+    }
+
     this.velocity.set(0, 0);
     this.dashingUntil = 0;
     this.revivingUntil = time + this.config.reviveMs;
     this.invulnerableUntil = time + this.config.reviveInvulnerableMs;
+    this.isAlive = true;
+    this.isRespawning = true;
+    this.canMove = false;
+    this.canShoot = false;
     this.sprite.body.stop();
     this.sprite.body.enable = false;
+    this.sprite.setActive(true);
+    this.sprite.setVisible(false);
+    this.sprite.setAlpha(0);
+    this.sprite.clearTint();
     this.sprite.setPosition(x, y);
+
+    // Respawn is completed both by this timer and by update() as a guard, so Luz
+    // cannot stay invisible if one path is skipped during a pause or scene tick.
+    this.scene.time.delayedCall(this.config.reviveMs, () => this.completeRevive(this.scene.time.now));
     this.scene.tweens.add({
       targets: this.sprite,
       scaleX: 1.22,
@@ -91,8 +121,64 @@ export default class Player {
     });
   }
 
+  completeRevive(time) {
+    if (!this.isRespawning || this.hp <= 0) {
+      return;
+    }
+
+    this.isRespawning = false;
+    this.isAlive = true;
+    this.canMove = true;
+    this.canShoot = true;
+    this.velocity.set(0, 0);
+    this.dashingUntil = 0;
+    this.sprite.setActive(true);
+    this.sprite.setVisible(true);
+    this.sprite.setAlpha(1);
+    this.sprite.setScale(1);
+    this.sprite.clearTint();
+    this.sprite.body.enable = true;
+    this.sprite.body.setAllowGravity(false);
+    this.sprite.body.setSize(18, 24, true);
+    this.sprite.body.reset(this.sprite.x, this.sprite.y);
+    this.sprite.body.setVelocity(0, 0);
+    this.invulnerableUntil = Math.max(this.invulnerableUntil, time + this.config.hitInvulnerableMs);
+  }
+
+  resetForBattle(x, y) {
+    this.hp = this.maxHp;
+    this.invulnerableUntil = 0;
+    this.dashingUntil = 0;
+    this.revivingUntil = 0;
+    this.isAlive = true;
+    this.isRespawning = false;
+    this.canMove = true;
+    this.canShoot = true;
+    this.velocity.set(0, 0);
+    this.sprite.setActive(true);
+    this.sprite.setVisible(true);
+    this.sprite.setAlpha(1);
+    this.sprite.setScale(1);
+    this.sprite.clearTint();
+    this.sprite.setPosition(x, y);
+    this.sprite.body.enable = true;
+    this.sprite.body.setAllowGravity(false);
+    this.sprite.body.setSize(18, 24, true);
+    this.sprite.body.reset(x, y);
+    this.sprite.body.setVelocity(0, 0);
+  }
+
   setSafety(time, durationMs) {
     this.invulnerableUntil = Math.max(this.invulnerableUntil, time + durationMs);
+  }
+
+  canTakeDamage(time) {
+    return this.isAlive
+      && !this.isRespawning
+      && this.sprite.active
+      && this.sprite.visible
+      && this.sprite.body.enable
+      && !this.isInvulnerable(time);
   }
 
   isInvulnerable(time) {

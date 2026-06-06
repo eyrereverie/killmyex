@@ -22,6 +22,7 @@ export default class Level1Scene extends Phaser.Scene {
     this.configData = level1Config;
     this.state = new BattleStateMachine('intro');
     this.inputHandler = new PlayerInput(this);
+    this.physics.resume();
     this.cameras.main.setBackgroundColor(Palette.background);
     this.addBackground();
 
@@ -292,6 +293,9 @@ export default class Level1Scene extends Phaser.Scene {
 
   revivePlayer() {
     this.waveDirector.clearBubbles();
+    // Keep the Player instance and colliders intact. The player owns the
+    // temporary disabled/invisible respawn state and explicitly restores every
+    // render, input, shooting, and physics flag when the delay completes.
     this.player.revive(this.time.now, GAME_WIDTH / 2, 646);
     this.showFloatingLabel(`${this.player.hp} HEART${this.player.hp === 1 ? '' : 'S'} LEFT`);
   }

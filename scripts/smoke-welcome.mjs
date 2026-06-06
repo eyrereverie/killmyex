@@ -142,7 +142,7 @@ try {
     throw new Error(`Expected keyboard movement to move Luz left. Before: ${levelState.playerX}, after: ${movedPlayer.x}.`);
   }
 
-  const reviveState = await page.evaluate(() => {
+  const reviveStartState = await page.evaluate(() => {
     const scene = window.killMyExGame.scene.getScene('Level1Scene');
     scene.player.damage(scene.time.now);
     scene.revivePlayer();
@@ -151,12 +151,104 @@ try {
       x: scene.player.sprite.x,
       y: scene.player.sprite.y,
       bodyEnabled: scene.player.sprite.body.enable,
+      visible: scene.player.sprite.visible,
+      canMove: scene.player.canMove,
+      canShoot: scene.player.canShoot,
+      isRespawning: scene.player.isRespawning,
       state: scene.state.state,
     };
   });
 
-  if (reviveState.hp !== 2 || reviveState.x !== 195 || reviveState.y !== 646 || reviveState.bodyEnabled || reviveState.state !== 'combat') {
-    throw new Error(`Expected Luz to revive after losing one heart. State: ${JSON.stringify(reviveState)}.`);
+  if (reviveStartState.hp !== 2 || reviveStartState.x !== 195 || reviveStartState.y !== 646 || reviveStartState.bodyEnabled || reviveStartState.visible || reviveStartState.canMove || reviveStartState.canShoot || !reviveStartState.isRespawning || reviveStartState.state !== 'combat') {
+    throw new Error(`Expected Luz to enter respawn delay after losing one heart. State: ${JSON.stringify(reviveStartState)}.`);
+  }
+
+  await page.waitForTimeout(850);
+
+  const reviveCompleteState = await page.evaluate(() => {
+    const scene = window.killMyExGame.scene.getScene('Level1Scene');
+    return {
+      hp: scene.player.hp,
+      x: scene.player.sprite.x,
+      y: scene.player.sprite.y,
+      bodyEnabled: scene.player.sprite.body.enable,
+      visible: scene.player.sprite.visible,
+      active: scene.player.sprite.active,
+      alpha: scene.player.sprite.alpha,
+      canMove: scene.player.canMove,
+      canShoot: scene.player.canShoot,
+      isAlive: scene.player.isAlive,
+      isRespawning: scene.player.isRespawning,
+      state: scene.state.state,
+    };
+  });
+
+  if (reviveCompleteState.hp !== 2 || reviveCompleteState.x !== 195 || reviveCompleteState.y !== 646 || !reviveCompleteState.bodyEnabled || !reviveCompleteState.visible || !reviveCompleteState.active || reviveCompleteState.alpha <= 0 || !reviveCompleteState.canMove || !reviveCompleteState.canShoot || !reviveCompleteState.isAlive || reviveCompleteState.isRespawning || reviveCompleteState.state !== 'combat') {
+    throw new Error(`Expected Luz to be visible and active after respawn. State: ${JSON.stringify(reviveCompleteState)}.`);
+  }
+
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(120);
+
+  const postRespawnShotState = await page.evaluate(() => {
+    const scene = window.killMyExGame.scene.getScene('Level1Scene');
+    return {
+      activeShots: scene.playerShooter.group.countActive(true),
+      canShoot: scene.player.canShoot,
+      visible: scene.player.sprite.visible,
+    };
+  });
+
+  if (postRespawnShotState.activeShots < 1 || !postRespawnShotState.canShoot || !postRespawnShotState.visible) {
+    throw new Error(`Expected Luz to shoot after respawning. State: ${JSON.stringify(postRespawnShotState)}.`);
+  }
+
+  const secondHitState = await page.evaluate(() => {
+    const scene = window.killMyExGame.scene.getScene('Level1Scene');
+    scene.player.invulnerableUntil = 0;
+    scene.player.damage(scene.time.now);
+    scene.revivePlayer();
+    return {
+      hp: scene.player.hp,
+      bodyEnabled: scene.player.sprite.body.enable,
+      visible: scene.player.sprite.visible,
+      canMove: scene.player.canMove,
+      canShoot: scene.player.canShoot,
+      isRespawning: scene.player.isRespawning,
+    };
+  });
+
+  if (secondHitState.hp !== 1 || secondHitState.bodyEnabled || secondHitState.visible || secondHitState.canMove || secondHitState.canShoot || !secondHitState.isRespawning) {
+    throw new Error(`Expected Luz to be hittable again and enter a second respawn. State: ${JSON.stringify(secondHitState)}.`);
+  }
+
+  await page.evaluate(() => window.killMyExGame.scene.getScene('Level1Scene').scene.restart());
+  await page.waitForFunction(() => {
+    const scene = window.killMyExGame.scene.getScene('Level1Scene');
+    return scene?.state?.state === 'intro' && scene.player?.hp === scene.player?.maxHp;
+  });
+
+  const restartState = await page.evaluate(() => {
+    const scene = window.killMyExGame.scene.getScene('Level1Scene');
+    return {
+      hp: scene.player.hp,
+      maxHp: scene.player.maxHp,
+      x: scene.player.sprite.x,
+      y: scene.player.sprite.y,
+      visible: scene.player.sprite.visible,
+      active: scene.player.sprite.active,
+      bodyEnabled: scene.player.sprite.body.enable,
+      canMove: scene.player.canMove,
+      canShoot: scene.player.canShoot,
+      isAlive: scene.player.isAlive,
+      isRespawning: scene.player.isRespawning,
+      physicsPaused: scene.physics.world.isPaused,
+      state: scene.state.state,
+    };
+  });
+
+  if (restartState.hp !== 3 || restartState.maxHp !== 3 || restartState.x !== 195 || restartState.y !== 646 || restartState.visible || !restartState.active || !restartState.bodyEnabled || !restartState.canMove || !restartState.canShoot || !restartState.isAlive || restartState.isRespawning || restartState.physicsPaused || restartState.state !== 'intro') {
+    throw new Error(`Expected retry/restart to reset Luz completely. State: ${JSON.stringify(restartState)}.`);
   }
 
   console.log('Welcome and Level 1 smoke test passed.');
